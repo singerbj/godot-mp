@@ -8,7 +8,6 @@ onready var lobby_container = get_node("lobby_container")
 
 # Player Name
 const PLAYER_NAME_DEFAULT = "Player"
-const SERVER_NAME_DEFAULT = "Server"
 
 # MAIN MENU - Join Game
 # Opens up the 'Connect to Server' window
@@ -21,7 +20,8 @@ func _on_join_game_button_pressed():
 # Opens up the 'Choose a nickname' window
 func _on_host_game_button_pressed():
 	menu_container.hide()
-	host_container.show()
+#	host_container.show()
+	_on_continue_button_pressed()
 
 
 # MAIN MENU - Quit Game
@@ -58,17 +58,9 @@ func _on_connect_button_pressed():
 # HOST CONTAINER - Continue (from choosing a nickname)
 # Opens the server for connectivity from clients
 func _on_continue_button_pressed():
-	# Check if nickname is valid
-	var player_name = host_container.find_node("lineedit_nickname").get_text()
-	if(player_name == ""):
-		host_container.find_node("label_error").set_text("Nickname cannot be empty")
-		return
-	
-	# Clear error (if any)
-	host_container.find_node("label_error").set_text("")
 	
 	# Establish network
-	gamestate.host_game(player_name)
+	gamestate.host_game()
 	
 	# Refresh Player List (with your own name)
 	refresh_lobby()
@@ -110,7 +102,6 @@ func _on_cancel_button_pressed():
 func _ready():
 	# Set default nicknames on host/join
 	join_container.find_node("lineedit_nickname").set_text(PLAYER_NAME_DEFAULT)
-	host_container.find_node("lineedit_nickname").set_text(SERVER_NAME_DEFAULT)
 	
 	# Setup Network Signaling between Gamestate and Game UI
 	gamestate.connect("refresh_lobby", self, "refresh_lobby")

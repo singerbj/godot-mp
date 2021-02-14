@@ -182,27 +182,6 @@ text = "Choose your Nickname"
 align = 1
 valign = 1
 
-[node name="hbox_container" type="HBoxContainer" parent="host_container/panel_container/vbox_container"]
-margin_top = 18.0
-margin_right = 268.0
-margin_bottom = 42.0
-mouse_filter = 0
-custom_constants/separation = 30
-
-[node name="label_nickname" type="Label" parent="host_container/panel_container/vbox_container/hbox_container"]
-margin_top = 5.0
-margin_right = 68.0
-margin_bottom = 19.0
-mouse_filter = 1
-size_flags_vertical = 0
-text = "Nickname:"
-
-[node name="lineedit_nickname" type="LineEdit" parent="host_container/panel_container/vbox_container/hbox_container"]
-margin_left = 98.0
-margin_right = 268.0
-margin_bottom = 24.0
-custom_constants/minimum_spaces = 40
-
 [node name="label_error" type="Label" parent="host_container/panel_container/vbox_container"]
 margin_top = 46.0
 margin_right = 268.0
@@ -296,7 +275,6 @@ text = "Start Game"
 [connection signal="text_changed" from="join_container/panel_container/vbox_container/hbox_container/lineedit_nickname" to="." method="_on_lineedit_nickname_text_changed"]
 [connection signal="pressed" from="join_container/panel_container/vbox_container/hbox_container2/cancel_button" to="." method="_on_cancel_button_pressed"]
 [connection signal="pressed" from="join_container/panel_container/vbox_container/hbox_container2/connect_button" to="." method="_on_connect_button_pressed"]
-[connection signal="text_changed" from="host_container/panel_container/vbox_container/hbox_container/lineedit_nickname" to="." method="_on_lineedit_nickname_text_changed"]
 [connection signal="pressed" from="host_container/panel_container/vbox_container/hbox_container2/cancel_button" to="." method="_on_cancel_button_pressed"]
 [connection signal="pressed" from="host_container/panel_container/vbox_container/hbox_container2/continue_button" to="." method="_on_continue_button_pressed"]
 [connection signal="pressed" from="lobby_container/panel_container/vbox_container/hbox_container2/cancel_button" to="." method="_on_cancel_lobby_button_pressed"]

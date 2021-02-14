@@ -1,23 +1,22 @@
 extends KinematicBody
 
-puppet var puppet_pos = Vector3()
-puppet var puppet_motion = Vector3()
-#puppet var puppet_mouse_position = Vector3()
-puppet var puppet_is_sprinting = false
+export var is_sprinting = false
+export var player_id = 0
+export var control = false
 
 export var speed = 10
 export var sprint_speed = 15
 export var acceleration = 10
 export var gravity = 0.98
 export var jump_y_power = 32.5
-export var mouse_sensitivity = 0.0005
+export var mouse_sensitivity = 0.00075
 
 var velocity = Vector3()
 var rot_x = 0
 var y_delta
 
 func _input(event):
-	if event is InputEventMouseMotion:
+	if control == true and event is InputEventMouseMotion:
 		# reset rotation
 		self.transform.basis = Basis()
 		# calculate y delta
@@ -27,10 +26,7 @@ func _input(event):
 		rotate_object_local(Vector3(0, -1, 0), rot_x)
 				
 func _physics_process(delta):
-	var is_sprinting = null
-	
-#	print(is_network_master())
-	if (is_network_master()):
+	if control == true:
 		var head_basis = self.get_global_transform().basis
 		var dir = Vector3()
 		var control_dir = Vector2()
@@ -65,13 +61,10 @@ func _physics_process(delta):
 		
 		velocity = move_and_slide(velocity, Vector3.UP)
 		
-		rset_unreliable("puppet_is_sprinting", is_sprinting) 
-		rset("puppet_motion", velocity)
-		rset("puppet_pos", transform.origin)
-	else:
-		is_sprinting = puppet_is_sprinting
-		transform.origin = puppet_pos
-		velocity = puppet_motion
+#		rpc_unreliable("puppet_is_sprinting", player_id, is_sprinting) 
+#		rpc_unreliable("puppet_do_move", player_id, velocity)
+		rpc_unreliable("puppet_do_move", player_id, self.transform.origin)
+	
 		
 #	if(is_sprinting):
 #		animation.set_speed(2.5)
@@ -79,3 +72,16 @@ func _physics_process(delta):
 #	else:
 #		animation.set_speed(1.2)
 #		speed = speed_default
+
+remote func puppet_is_sprinting(pid, is_sprinting):
+	var root  = get_parent()
+	var playerNode = root.get_node(str(pid))
+	if playerNode != null:
+		playerNode.is_sprinting = is_sprinting
+	
+remote func puppet_do_move(pid, position):
+	var root = get_parent()
+	var playerNode = root.get_node(str(pid))
+	if playerNode != null:
+#		playerNode.move_and_slide(position)
+		playerNode.transform.origin = position
