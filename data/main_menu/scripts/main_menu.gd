@@ -6,8 +6,31 @@ onready var join_container = get_node("join_container")
 onready var host_container = get_node("host_container")
 onready var lobby_container = get_node("lobby_container")
 
-# Player Name
 const PLAYER_NAME_DEFAULT = "Player"
+const ARG_SERVER = "server"
+const ARG_CLIENT = "client"
+	
+func _ready():
+	var args = OS.get_cmdline_args();
+	if args.size() > 0 and args[0].to_lower() == ARG_SERVER:
+		gamestate.host_game()
+		gamestate.start_game()
+	elif args.size() > 0 and args[0].to_lower() == ARG_CLIENT:
+		var ip = '127.0.0.1'
+		if args.size() > 1:
+			ip = args[1]
+		randomize()
+		gamestate.join_game(PLAYER_NAME_DEFAULT + str(rand_range(1000, 9999)), ip)
+	else:
+		# Set default nicknames on host/join
+		join_container.find_node("lineedit_nickname").set_text(PLAYER_NAME_DEFAULT)
+	
+	# Setup Network Signaling between Gamestate and Game UI
+	gamestate.connect("refresh_lobby", self, "refresh_lobby")
+	gamestate.connect("server_ended", self, "_on_server_ended")
+	gamestate.connect("server_error", self, "_on_server_error")
+	gamestate.connect("connection_success", self, "_on_connection_success")
+	gamestate.connect("connection_fail", self, "_on_connection_fail")
 
 # MAIN MENU - Join Game
 # Opens up the 'Connect to Server' window
@@ -97,18 +120,6 @@ func _on_cancel_button_pressed():
 	join_container.find_node("label_error").set_text("")
 	host_container.hide()
 	host_container.find_node("label_error").set_text("")
-
-
-func _ready():
-	# Set default nicknames on host/join
-	join_container.find_node("lineedit_nickname").set_text(PLAYER_NAME_DEFAULT)
-	
-	# Setup Network Signaling between Gamestate and Game UI
-	gamestate.connect("refresh_lobby", self, "refresh_lobby")
-	gamestate.connect("server_ended", self, "_on_server_ended")
-	gamestate.connect("server_error", self, "_on_server_error")
-	gamestate.connect("connection_success", self, "_on_connection_success")
-	gamestate.connect("connection_fail", self, "_on_connection_fail")
 
 # Refresh Lobby's player list
 # This is run after we have gotten updates from the server regarding new players

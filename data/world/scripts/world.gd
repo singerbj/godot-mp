@@ -7,7 +7,7 @@ func _process(delta):
 	pass
 	
 func add_player(player):
-	self.get_node("players").add_child(player)
+	self.get_node("players").call_deferred("add_child", player)
 	
 func remove_player(id):
 	self.get_node("players").get_node(str(id)).queue_free()

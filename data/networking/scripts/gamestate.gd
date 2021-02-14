@@ -169,7 +169,7 @@ remote func spawn_player(id):
 	# else we create our instance and add it to root
 	if(world == null):
 		world = load("res://data/world/world.tscn").instance()
-		get_tree().get_root().add_child(world)
+		get_tree().get_root().call_deferred("add_child", world)
 		get_tree().get_root().get_node("main_menu").hide() # Away with the menu! AWAY I SAY!
 #		world.get_node("hud/stats/name").set_text(player_name) # TODO
 	
@@ -184,7 +184,7 @@ remote func spawn_player(id):
 		# Set as master on yourself
 		player.set_network_master(id)
 		player.control = true
-		player.add_child(camera_scene.instance()) # Add camera to your player
+		player.call_deferred("add_child", camera_scene.instance()) # Add camera to your player
 	
 	# Add the player (or you) to the world!
 	world.add_player(player)

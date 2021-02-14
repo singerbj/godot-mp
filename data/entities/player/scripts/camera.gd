@@ -16,7 +16,7 @@ onready var screen_size_y = get_viewport().size.y
 onready var camera_tween = Tween.new()
 
 func _ready():
-	add_child(camera_tween)
+	self.call_deferred("add_child", camera_tween)
 		
 func _process(delta):	
 	if Input.is_action_just_pressed("toggle_camera"):
