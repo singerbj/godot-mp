@@ -12,6 +12,7 @@ const ARG_CLIENT = "client"
 	
 func _ready():
 	var args = OS.get_cmdline_args();
+	print(args)
 	if args.size() > 0 and args[0].to_lower() == ARG_SERVER:
 		gamestate.host_game()
 		gamestate.start_game()

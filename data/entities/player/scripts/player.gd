@@ -8,7 +8,7 @@ export var speed = 10
 export var sprint_speed = 15
 export var acceleration = 10
 export var gravity = 0.98
-export var jump_y_power = 32.5
+export var jump_y_power = 50
 export var mouse_sensitivity = 0.00075
 
 var velocity = Vector3()
@@ -54,16 +54,14 @@ func _physics_process(delta):
 			tempSpeed = sprint_speed
 			is_sprinting = true
 			
-			
 		velocity = velocity.linear_interpolate(dir * tempSpeed, acceleration * delta)
 			
 		velocity.y -= gravity
 		
 		velocity = move_and_slide(velocity, Vector3.UP)
 		
-#		rpc_unreliable("puppet_is_sprinting", player_id, is_sprinting) 
-#		rpc_unreliable("puppet_do_move", player_id, velocity)
-		rpc_unreliable("puppet_do_move", player_id, self.transform.origin)
+		rpc_unreliable("puppet_sprint", player_id, is_sprinting) 
+		rpc_unreliable("puppet_movement", player_id, self.transform)
 	
 		
 #	if(is_sprinting):
@@ -73,15 +71,14 @@ func _physics_process(delta):
 #		animation.set_speed(1.2)
 #		speed = speed_default
 
-remote func puppet_is_sprinting(pid, is_sprinting):
+remote func puppet_sprint(pid, is_sprinting):
 	var root  = get_parent()
 	var playerNode = root.get_node(str(pid))
 	if playerNode != null:
 		playerNode.is_sprinting = is_sprinting
 	
-remote func puppet_do_move(pid, position):
+remote func puppet_movement(pid, position):
 	var root = get_parent()
 	var playerNode = root.get_node(str(pid))
 	if playerNode != null:
-#		playerNode.move_and_slide(position)
-		playerNode.transform.origin = position
+		playerNode.transform = position
