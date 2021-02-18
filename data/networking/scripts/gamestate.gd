@@ -181,9 +181,9 @@ remote func spawn_player(id):
 		
 	# If the new player is you
 	if (id == get_tree().get_network_unique_id()):
-		# Set as master on yourself
-		player.set_network_master(id)
-		player.control = true
+#		# Set as master on yourself
+#		player.set_network_master(id)
+#		player.control = true
 		player.call_deferred("add_child", camera_scene.instance()) # Add camera to your player
 	
 	# Add the player (or you) to the world!
