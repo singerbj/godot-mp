@@ -3,7 +3,6 @@ extends KinematicBody
 export var is_sprinting = false
 export var player_id = 0
 export var control = false
-
 export var speed = 10
 export var sprint_speed = 15
 export var acceleration = 10
@@ -15,37 +14,32 @@ master var remote_movement = Vector3()
 puppet var remote_transform = Transform()
 puppet var remote_vel = Vector3()
 puppet var ack = 0
-var time = 0
 
+var time = 0
 var velocity = Vector3()
 var rot_x = 0
 var y_delta
 
 func _ready():
 	set_network_master(1)
-
-func _input(event):
-	if control == true and event is InputEventMouseMotion:
-		# reset rotation
-		self.transform.basis = Basis()
-		# calculate y delta
-		y_delta = event.relative.x * mouse_sensitivity
-		# rotate in Y
-		rot_x += y_delta
-		rotate_object_local(Vector3(0, -1, 0), rot_x)
-				
+		
 func _physics_process(delta):
 	if is_network_master():
-			move_and_slide(velocity + ($InputManager.movement.normalized() * speed))
-			rpc_unreliable("update_state",transform, get_floor_velocity(), $InputManager.movement_counter)
+			velocity.y -= gravity
+			move_and_slide(velocity + ($InputManager.movement.normalized() * speed), Vector3.UP)			
+			rpc_unreliable("update_state", transform, get_floor_velocity(), $InputManager.movement_counter)
 	else:
 		# Client code
 		time += delta
-		move_with_reconciliation(delta)
+		move_with_reconciliation(delta)		
 
 func move_with_reconciliation(delta):
 	var old_transform = transform
-	transform = remote_transform
+	if self.control:
+		transform.origin = remote_transform.origin
+	else:
+		transform = remote_transform
+	
 	var vel = remote_vel
 	var movement_list = $InputManager.movement_list
 	if movement_list.size() > 0:
@@ -65,6 +59,16 @@ puppet func update_state(t, velocity, ack):
 	self.remote_transform = t
 	self.remote_vel = velocity
 	self.ack = ack
+
+#func _input(event):
+#	if control == true and event is InputEventMouseMotion:
+#		# reset rotation
+#		self.transform.basis = Basis()
+#		# calculate y delta
+#		y_delta = event.relative.x * mouse_sensitivity
+#		# rotate in Y
+#		rot_x += y_delta
+#		rotate_object_local(Vector3(0, -1, 0), rot_x)
 
 #	if control == true:
 #		var head_basis = self.get_global_transform().basis
