@@ -3,8 +3,8 @@ extends KinematicBody
 export var is_sprinting = false
 export var player_id = 0
 export var control = false
-export var speed = 10
-export var sprint_speed = 15
+export var speed = 15
+export var sprint_speed = 25
 export var acceleration = 10
 export var gravity = 0.98
 export var jump_y_power = 50
@@ -24,10 +24,12 @@ func _ready():
 	set_network_master(1)
 		
 func _physics_process(delta):
+	velocity.y -= gravity
+	move_and_slide(velocity + ($InputManager.movement.normalized() * speed), Vector3.UP)	
+		
 	if is_network_master():
-			velocity.y -= gravity
-			move_and_slide(velocity + ($InputManager.movement.normalized() * speed), Vector3.UP)			
-			rpc_unreliable("update_state", transform, get_floor_velocity(), $InputManager.movement_counter)
+		yield(get_tree().create_timer(testutils.get_fake_latency() / 1000), "timeout")
+		rpc_unreliable("update_state", transform, get_floor_velocity(), $InputManager.movement_counter)
 	else:
 		# Client code
 		time += delta
@@ -45,7 +47,7 @@ func move_with_reconciliation(delta):
 	if movement_list.size() > 0:
 		for i in range(movement_list.size()):
 			var mov = movement_list[i]
-			vel = move_and_slide(mov[2].normalized()* speed * mov[1] / delta)
+			vel = move_and_slide(mov[2].normalized() * speed * mov[1] / delta)
 	
 	interpolate(old_transform)
 
@@ -53,7 +55,7 @@ func interpolate(old_transform):
 	var scale_factor = 0.1
 	var dist = transform.origin.distance_to(old_transform.origin)
 	var weight = clamp(pow(2, dist / 4) * scale_factor, 0.0, 1.0)
-	transform.origin = old_transform.origin.linear_interpolate(transform.origin,weight)
+	transform.origin = old_transform.origin.linear_interpolate(transform.origin, weight)
 
 puppet func update_state(t, velocity, ack):
 	self.remote_transform = t

@@ -1,6 +1,7 @@
 extends Node
 
 onready var player = get_node("../")
+onready var debug_info = get_node("../CanvasLayer/DebugInfo")
 master var look_direction = Vector3()
 var old_look_direction = Vector3()
 master var movement = Vector3()
@@ -15,6 +16,8 @@ var current_delta
 func _physics_process(delta):
 		current_delta = delta
 		check_ackowledged_inputs()
+		if player.control:
+			debug_info.text = str(player.ack) + " - " + str(movement_list.size())
 
 func _unhandled_input(event):
 	if player.control:
@@ -27,7 +30,7 @@ func _unhandled_input(event):
 			rot_x += y_delta
 			player.rotate_object_local(Vector3(0, -1, 0), rot_x)
 			
-			send_look_direction()			
+#			send_look_direction()			
 		
 		else:
 			old_movement = movement
@@ -71,15 +74,17 @@ master func update_input_on_server(incoming_movement_counter, movement):
 		movement_counter = incoming_movement_counter
 		self.movement = movement
 
-master func update_look_direction_on_server(player_transform_basis):
-	player.transform.basis = player_transform_basis
+#master func update_look_direction_on_server(player_transform_basis):
+#	player.transform.basis = player_transform_basis
 		
 func send_inputs():
-	print("sending inputs from " + str(get_tree().get_network_unique_id()) + ": " + str(movement)) 
+	print("sending inputs from peer " + str(get_tree().get_network_unique_id()) + ": " + str(movement)) 
 	movement_counter += 1
 	movement_list.push_back([movement_counter, current_delta, movement])
+	yield(get_tree().create_timer(testutils.get_fake_latency() / 1000), "timeout")
 	rpc_unreliable_id(1, "update_input_on_server", movement_counter, movement)
 	
-func send_look_direction():
-	rpc_unreliable_id(1, "update_look_direction_on_server", player.transform.basis)
+#func send_look_direction():
+#	yield(get_tree().create_timer(testutils.get_fake_latency() / 1000), "timeout")
+#	rpc_unreliable_id(1, "update_look_direction_on_server", player.transform.basis)
 
